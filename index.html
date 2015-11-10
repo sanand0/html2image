@@ -6,12 +6,70 @@
   <title>HTML to image test</title>
   <style>
     html { font-family: sans-serif; }
+    th { text-align: left; border-bottom: 1px solid #555; }
   </style>
 </head>
 <body>
 
   <h1>HTML to image tests</h1>
-  <p>See <a href="https://sanand0.github.io/html2image/">documentation and results</a>.</p>
+  <p>See <a href="https://github.com/sanand0/html2image/">documentation</a>.</p>
 
+  <!-- Every table row is a test case -->
+  <table>
+    <thead>
+      <tr>
+        <th>Original</th>
+        <th><a href="https://github.com/niklasvh/html2canvas/releases/tag/0.5.0-alpha1">html2canvas 0.5.0-alpha1</a></th>
+        <th><a href="https://github.com/cburgmer/rasterizeHTML.js/releases/tag/1.2.0">rasterizeHTML.js 1.2.0</a>
+      </tr>
+    </thead>
+    <tbody class="tests">
+      <tr>
+        <td>
+          <h3>HTML and CSS</h3>
+          <p>Paragraph with <strong>strong</strong>, <em>emphasised</em> text.</p>
+          <img src="lenna.jpg" width="150" height="150">
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <h3>SVG</h3>
+          <svg width="150" height="150" viewBox="0 0 200 200">
+            <rect x="0" y="0" width="200" height="200" fill="red"></rect>
+            <circle cx="100" cy="100" r="100" fill="yellow"></circle>
+            <path d="M50,50h100v100h-100z" fill="lime"></path>
+          </svg>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <script src="lib/html2canvas.js"></script>
+  <script src="lib/html2canvas.svg.js"></script>
+  <script src="lib/rasterizeHTML.allinone.js"></script>
+  <script>
+  Array.prototype.forEach.call(document.querySelectorAll('.tests td'), function(test) {
+    try {
+      html2canvas(test, {
+        onrendered: function(canvas) {
+          canvas.setAttribute('class', 'test')
+          test.parentNode.insertBefore(canvas, test.nextSibling)
+        }
+      })
+    } catch(e) { console.log('html2canvas failed on', test) }
+
+    try {
+      var td = document.createElement('td'),
+          canvas = document.createElement('canvas'),
+          bounds = test.getBoundingClientRect()
+      canvas.setAttribute('width', bounds.width)
+      canvas.setAttribute('height', bounds.height)
+      test.parentNode.insertBefore(td, test.nextSibling)
+      td.appendChild(canvas)
+      rasterizeHTML.drawHTML(test.innerHTML, canvas)
+    } catch(e) { console.log('rasterizeHTML.js failed on', test) }
+
+  })
+  </script>
 </body>
 </html>
